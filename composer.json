@@ -1,0 +1,12 @@
+{
+	"name": "wppunk/wpplugin-replace",
+	"require": {
+		"php": ">=7.2",
+		"symfony/finder": ">=5.1"
+	},
+	"autoload": {
+		"psr-4": {
+			"wppunk\\PluginRename\\": "src"
+		}
+	}
+}
