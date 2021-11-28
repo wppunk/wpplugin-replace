@@ -6,16 +6,18 @@ class Replace {
 
 	private $dir;
 	private $name;
+	private $slug;
 	private $plugin_url;
 	private $version;
 	private $author;
 	private $author_url;
-	private $plugin_name  = [];
+	private $plugin_slug = [];
 	private $replacements = [];
 
-	public function __construct( $dir, $plugin_name, $version, $plugin_url, $author, $author_url ) {
+	public function __construct( $dir, $plugin_name, $plugin_slug, $version, $plugin_url, $author, $author_url ) {
 		$this->dir        = $dir;
 		$this->name       = $plugin_name;
+		$this->slug       = $plugin_slug;
 		$this->version    = $version;
 		$this->plugin_url = $plugin_url;
 		$this->author     = $author;
@@ -45,12 +47,13 @@ class Replace {
 	}
 
 	private function create_variables() {
-		$this->get_plugin_name( $this->name );
+		$this->get_plugin_slug( $this->slug );
 		$this->replacements = [
-			'{VERSION}'    => $this->version,
-			'{URL}'        => $this->plugin_url,
-			'{AUTHOR}'     => $this->author,
-			'{AUTHOR_URL}' => $this->author_url,
+			'{PLUGIN_NAME}' => $this->name,
+			'{VERSION}'     => $this->version,
+			'{URL}'         => $this->plugin_url,
+			'{AUTHOR}'      => $this->author,
+			'{AUTHOR_URL}'  => $this->author_url,
 		];
 	}
 
@@ -62,7 +65,7 @@ class Replace {
 			->ignoreDotFiles( false )
 			->in( $this->dir )
 			->notPath( [ '.phpcs.cache', '.idea', 'node_modules', 'vendor', 'vendor-bin' ] )
-			->contains( '/{URL}|{VERSION}|{AUTHOR}|{AUTHOR_URI}|[pP](lugin|LUGIN)[-_ ]{0,1}[nN](ame|AME)/is' );
+			->contains( '/{URL}|{PLUGIN_NAME}|{VERSION}|{AUTHOR}|{AUTHOR_URI}|[pP](lugin|LUGIN)[-_ ]{0,1}[sS](lug|LUG)/is' );
 
 		foreach ( $finder as $file ) {
 			$files[ $file->getRelativePathname() ] = $file->getRealPath();
@@ -71,7 +74,7 @@ class Replace {
 		return $files;
 	}
 
-	private function get_plugin_name( $plugin_name ) {
+	private function get_plugin_slug( $plugin_slug ) {
 		$default = ucwords(
 			preg_replace(
 				'/[-_]/',
@@ -82,36 +85,30 @@ class Replace {
 					preg_replace(
 						'/(?<!^)[A-Z]/',
 						' $0',
-						strtoupper( $plugin_name ) === $plugin_name
-							? strtolower( $plugin_name )
-							: $plugin_name
+						strtoupper( $plugin_slug ) === $plugin_slug
+							? strtolower( $plugin_slug )
+							: $plugin_slug
 					)
 				)
 			)
 		);
 
-		$this->plugin_name = [
-			'plugin_name' => preg_replace( '/[ _-]/', '_', strtolower( $default ) ),
-			'plugin-name' => preg_replace( '/[ _]/', '-', strtolower( $default ) ),
-			'Plugin Name' => $default,
-			'PluginName'  => preg_replace( '/[-_ ]/', '', $default ),
-			'PLUGIN_NAME' => preg_replace( '/[- ]/', '_', strtoupper( $default ) ),
+		$this->plugin_slug = [
+			'plugin_slug' => preg_replace( '/[ _-]/', '_', strtolower( $default ) ),
+			'plugin-slug' => preg_replace( '/[ _]/', '-', strtolower( $default ) ),
+			'PluginSlug'  => preg_replace( '/[-_ ]/', '', $default ),
+			'PLUGIN_SLUG' => preg_replace( '/[- ]/', '_', strtoupper( $default ) ),
 		];
 	}
 
 	private function replace_plugin_name( $file ) {
-		foreach ( $this->plugin_name as $search => $replacement ) {
+		foreach ( $this->plugin_slug as $search => $replacement ) {
 			$file = preg_replace(
 				sprintf( '/%s/', $search ),
 				$replacement,
 				$file
 			);
 		}
-		$file = preg_replace(
-			sprintf( '/%s/', $this->plugin_name['Plugin Name'] . ':' ),
-			'Plugin Name:',
-			$file
-		);
 
 		return $file;
 	}

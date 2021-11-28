@@ -6,8 +6,9 @@ class Wizard {
 
 	private $response = [];
 
-	private $name_question        = 'Plugin name (Example: Plugin Name)';
-	private $version_question     = 'Version (Default: 1.0.0)';
+	private $name_question = 'Plugin name (Example: Plugin Name)';
+	private $slug_question = 'Plugin slug/textdomain (Example: plugin-slug. Default: plugin-name)';
+	private $version_question = 'Version (Default: 1.0.0)';
 	private $additional_questions = [
 		'Plugin url (Example: https://gitub.com/wppunk/WPPlugin. Default: \'\')',
 		'Author (Example: wppunk. Default: \'\')',
@@ -19,6 +20,8 @@ class Wizard {
 		while ( empty( $name ) ) {
 			$name = $this->ask( $this->name_question );
 		}
+		$slug                 = $this->ask( $this->slug_question );
+		$slug                 = ! empty( $slug ) ? $slug : $this->name_question;
 		$verison              = $this->ask( $this->version_question );
 		$verison              = ! empty( $verison ) ? $verison : '1.0.0';
 		$additional_responses = [];
@@ -29,6 +32,7 @@ class Wizard {
 		return array_merge(
 			[
 				$name,
+				$slug,
 				$verison,
 			],
 			$additional_responses
